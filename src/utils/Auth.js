@@ -17,3 +17,21 @@ export const register = (email, password) => {
   })
     .then(checkResponse)
 }
+
+export const authorize = (email, password) => {
+  return fetch(`${BASE_URL}/signin`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ email, password })
+  })
+    .then((response => response.json()))
+    .then((token) => {
+      if (token) {
+        localStorage.setItem('token', JSON.stringify(token));
+        return token;
+      }
+    })
+    .catch(err => console.log(err))
+}

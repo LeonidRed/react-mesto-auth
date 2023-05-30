@@ -116,6 +116,20 @@ function App() {
         console.log('ok');
         navigate('/sign-in', { replace: true });
       })
+      .catch((err) => console.log(err))
+  }
+
+  function handleLoginUser(email, password) {
+    Auth.authorize(email, password)
+      .then((token) => {
+        if (token) {
+          console.log('login ok')
+          console.log(token)
+          setIsLogged(true)
+          navigate('/', { replace: true })
+        }
+      })
+      .catch(err => console.log(err))
   }
 
   function closeAllPopups() {
@@ -145,7 +159,7 @@ function App() {
           />} />
           {/* <Route path="/" element={isLogged ? <Navigate to="/" replace /> : <Navigate to="/sign-in" replace />} /> */}
           <Route path="/sign-up" element={<Register onRegister={handleRegisterUser} />} />
-          <Route path="/sign-in" element={<Login />} />
+          <Route path="/sign-in" element={<Login onLogin={handleLoginUser} />} />
         </Routes>
 
         {isLogged && <Footer />}
