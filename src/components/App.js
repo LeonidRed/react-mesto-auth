@@ -13,7 +13,9 @@ import Register from "./Register"
 import Login from "./Login"
 import ProtectedRoute from "./ProtectedRoute"
 import InfoTooltip from "./InfoTooltip"
-import { BrowserRouter, Route, Routes, Navigate } from 'react-router-dom'
+import { Route, Routes, useNavigate } from 'react-router-dom'
+import * as Auth from '../utils/Auth.js'
+
 
 function App() {
   const [isEditProfilePopupOpen, setEditProfilePopupOpen] = React.useState(false)
@@ -23,8 +25,10 @@ function App() {
   const [selectedCard, setSelectedCard] = React.useState({ name: '', link: '' })
   const [currentUser, setCurrentUser] = React.useState({})
   const [cards, setCards] = React.useState([])
-  const [isLogged, setIsLogged] = React.useState(true)
+  const [isLogged, setIsLogged] = React.useState(false)
   const [isInfoTooltipPopupOpen, setInfoTooltipPopupOpen] = React.useState(false)
+  const navigate = useNavigate()
+
   console.log(isLogged);
 
   React.useEffect(() => {
@@ -106,6 +110,14 @@ function App() {
       .catch((err) => console.log(err))
   }
 
+  function handleRegisterUser(email, password) {
+    Auth.register(email, password)
+      .then(() => {
+        console.log('ok');
+        navigate('/sign-in', { replace: true });
+      })
+  }
+
   function closeAllPopups() {
     setEditProfilePopupOpen(false)
     setAddPlacePopupOpen(false)
@@ -132,8 +144,8 @@ function App() {
             isLogged={isLogged}
           />} />
           {/* <Route path="/" element={isLogged ? <Navigate to="/" replace /> : <Navigate to="/sign-in" replace />} /> */}
-          <Route path="/sign-up" element={<Register onSubmit={handleAuthorizationClick} />} />
-          <Route path="/sign-in" element={<Login onSubmit={handleAuthorizationClick} />} />
+          <Route path="/sign-up" element={<Register onRegister={handleRegisterUser} />} />
+          <Route path="/sign-in" element={<Login />} />
         </Routes>
 
         {isLogged && <Footer />}
