@@ -1,6 +1,8 @@
 .page__header {
   padding-top: 45px;
   margin-bottom: 40px;
+  display: flex;
+  justify-content: space-between;
 }
 
 

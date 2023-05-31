@@ -28,6 +28,9 @@ function App() {
   const [isLogged, setIsLogged] = React.useState(false)
   const [isInfoTooltipPopupOpen, setInfoTooltipPopupOpen] = React.useState(false)
   const navigate = useNavigate()
+  const [userEmail, setUserEmail] = React.useState('')
+  const [userStatus, setUserStatus] = React.useState('')
+
 
   console.log(isLogged);
 
@@ -38,6 +41,11 @@ function App() {
         setCards(cards)
       })
       .catch(err => console.log(err))
+  }, [])
+
+  // проверка токена
+  React.useEffect(() => {
+    tokenCheck();
   }, [])
 
   function handleEditProfileClick() {
@@ -132,6 +140,30 @@ function App() {
       .catch(err => console.log(err))
   }
 
+  const tokenCheck = () => {
+    // если у пользователя есть токен в localStorage, 
+    // эта функция проверит, действующий он или нет
+    if (localStorage.getItem('token')) {
+      const jwt = JSON.parse(localStorage.getItem('token'))
+      if (jwt) {
+        // проверим токен
+        Auth.checkToken(jwt.token).then((res) => {
+          if (res) {
+            console.log(res)
+            const userData = {
+              email: res.data.email
+            }
+            // авторизуем пользователя
+            setIsLogged(true)
+            setUserEmail(userData.email)
+            setUserStatus('Выйти')
+            navigate("/", { replace: true })
+          }
+        });
+      }
+    }
+  }
+
   function closeAllPopups() {
     setEditProfilePopupOpen(false)
     setAddPlacePopupOpen(false)
@@ -143,7 +175,7 @@ function App() {
   return (
     <CurrentUserContext.Provider value={currentUser}>
       < div className="page">
-        <Header />
+        <Header userEmail={userEmail} userStatus={userStatus} />
         <Routes>
           <Route path="/" element={<ProtectedRoute
             element={Main}
