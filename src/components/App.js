@@ -45,7 +45,7 @@ function App() {
 
   // проверка токена
   React.useEffect(() => {
-    tokenCheck();
+    tokenCheck()
   }, [navigate])
 
   function handleEditProfileClick() {
