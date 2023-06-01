@@ -7,17 +7,18 @@
 Приложение написано на CRA, применено:
  - декларативный подход
  - функциональные компоненты
- - React-hooks.
+ - React-hooks
+ - Авторизация с JWT
 
 ### Ссылка на проект:
 
-<https://leonidred.github.io/mesto-react/>
+<https://leonidred.github.io/react-mesto-auth/>
 
 ### Установка и запуск приложения:
 
 Клонировать репозиторий с использованием SSH:
 
-`git@github.com:LeonidRed/mesto-react.git`
+`git@github.com:LeonidRed/react-mesto-auth.git`
 
 Установить зависимости:
 
