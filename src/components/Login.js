@@ -8,12 +8,12 @@ export default function Login(props) {
   })
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value } = e.target
 
     setFormValue({
       ...formValue,
       [name]: value
-    });
+    })
   }
   const handleSubmit = (e) => {
     e.preventDefault()

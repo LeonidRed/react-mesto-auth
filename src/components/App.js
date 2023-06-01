@@ -13,8 +13,10 @@ import Register from "./Register"
 import Login from "./Login"
 import ProtectedRoute from "./ProtectedRoute"
 import InfoTooltip from "./InfoTooltip"
-import { Route, Routes, useNavigate } from 'react-router-dom'
-import * as Auth from '../utils/Auth.js'
+import { Route, Routes, Navigate, useNavigate } from 'react-router-dom'
+import * as auth from '../utils/auth.js'
+import goodAuth from "../images/goodAuth.png"
+import badAuth from "../images/badAuth.png"
 
 
 function App() {
@@ -29,10 +31,8 @@ function App() {
   const [isInfoTooltipPopupOpen, setInfoTooltipPopupOpen] = React.useState(false)
   const navigate = useNavigate()
   const [userEmail, setUserEmail] = React.useState('')
-  const [userStatus, setUserStatus] = React.useState('')
-
-
-  console.log(isLogged);
+  const [tooltipImage, setTooltipImage] = React.useState('')
+  const [tooltipText, setTooltipText] = React.useState('')
 
   React.useEffect(() => {
     Promise.all([api.getUserInfo(), api.getInitialCards()])
@@ -46,7 +46,7 @@ function App() {
   // проверка токена
   React.useEffect(() => {
     tokenCheck();
-  }, [])
+  }, [navigate])
 
   function handleEditProfileClick() {
     setEditProfilePopupOpen(true)
@@ -60,20 +60,11 @@ function App() {
     setEditAvatarPopupOpen(true)
   }
 
-  // function handleDeleteCardClick() {
-  //   setDeleteCardPopupOpen(true)
-  // }
-
   function handleCardClick(card) {
     setSelectedCard({ name: `${card.name}`, link: `${card.link}` })
   }
 
-  function handleAuthorizationClick() {
-    setInfoTooltipPopupOpen(true)
-  }
-
   function handleLikeClick(card) {
-    // проверяем, есть ли уже лайк на этой карточке
     const isLiked = card.likes.some(i => i._id === currentUser._id)
 
     api.changeLikeCardStatus(card._id, !isLiked)
@@ -119,25 +110,36 @@ function App() {
   }
 
   function handleRegisterUser(email, password) {
-    Auth.register(email, password)
+    auth.register(email, password)
       .then(() => {
-        console.log('ok');
+        setInfoTooltipPopupOpen(true)
+        setTooltipImage(goodAuth)
+        setTooltipText('Вы успешно зарегистрировались!')
         navigate('/sign-in', { replace: true });
       })
-      .catch((err) => console.log(err))
+      .catch(err => {
+        setInfoTooltipPopupOpen(true)
+        setTooltipImage(badAuth)
+        setTooltipText('Что-то пошло не так! Попробуйте ещё раз.')
+        console.log(err)
+      })
   }
 
   function handleLoginUser(email, password) {
-    Auth.authorize(email, password)
+    auth.authorize(email, password)
       .then((token) => {
         if (token) {
-          console.log('login ok')
-          console.log(token)
+          localStorage.setItem('token', JSON.stringify(token))
           setIsLogged(true)
           navigate('/', { replace: true })
         }
       })
-      .catch(err => console.log(err))
+      .catch(err => {
+        setInfoTooltipPopupOpen(true)
+        setTooltipImage(badAuth)
+        setTooltipText('Что-то пошло не так! Попробуйте ещё раз.')
+        console.log(err)
+      })
   }
 
   const tokenCheck = () => {
@@ -147,21 +149,31 @@ function App() {
       const jwt = JSON.parse(localStorage.getItem('token'))
       if (jwt) {
         // проверим токен
-        Auth.checkToken(jwt.token).then((res) => {
+        auth.checkToken(jwt.token).then((res) => {
           if (res) {
-            console.log(res)
             const userData = {
               email: res.data.email
             }
             // авторизуем пользователя
             setIsLogged(true)
             setUserEmail(userData.email)
-            setUserStatus('Выйти')
             navigate("/", { replace: true })
           }
         });
       }
+    } else {
+      setIsLogged(false)
+      setUserEmail('')
     }
+  }
+
+  function userSignOut() {
+    localStorage.removeItem('token')
+    tokenCheck()
+  }
+
+  function userSignIn() {
+    setUserEmail('')
   }
 
   function closeAllPopups() {
@@ -169,29 +181,47 @@ function App() {
     setAddPlacePopupOpen(false)
     setEditAvatarPopupOpen(false)
     setDeleteCardPopupOpen(false)
+    setInfoTooltipPopupOpen(false)
     setSelectedCard({ name: '', link: '' })
   }
 
   return (
     <CurrentUserContext.Provider value={currentUser}>
       < div className="page">
-        <Header userEmail={userEmail} userStatus={userStatus} />
         <Routes>
-          <Route path="/" element={<ProtectedRoute
-            element={Main}
-            onEditProfile={handleEditProfileClick}
-            onAddPlace={handleAddPlaceClick}
-            onEditAvatar={handleEditAvatarClick}
-            // onDeleteButton={handleDeleteCardClick}
-            onCardClick={handleCardClick}
-            cards={cards}
-            onCardLike={handleLikeClick}
-            onCardDelete={handleCardDelete}
-            isLogged={isLogged}
-          />} />
-          {/* <Route path="/" element={isLogged ? <Navigate to="/" replace /> : <Navigate to="/sign-in" replace />} /> */}
-          <Route path="/sign-up" element={<Register onRegister={handleRegisterUser} />} />
-          <Route path="/sign-in" element={<Login onLogin={handleLoginUser} />} />
+          <Route path="*" element={<Navigate to={isLogged ? "/" : "/sign-in"} />} />
+
+          <Route path="/sign-up" element={
+            <>
+              <Header userStatus="Войти" userLink="/sign-in" />
+              <Register onRegister={handleRegisterUser} userSignIn={userSignIn} />
+            </>
+          } />
+
+          <Route path="/sign-in" element={
+            <>
+              <Header userStatus="Регистрация" userLink="/sign-up" />
+              <Login onLogin={handleLoginUser} />
+            </>
+          } />
+
+          <Route path="/" element={
+            <>
+              <Header userEmail={userEmail} userStatus="Выйти" userLink="/sign-up" userSignOut={userSignOut} />
+              <ProtectedRoute
+                element={Main}
+                onEditProfile={handleEditProfileClick}
+                onAddPlace={handleAddPlaceClick}
+                onEditAvatar={handleEditAvatarClick}
+                // onDeleteButton={handleDeleteCardClick}
+                onCardClick={handleCardClick}
+                cards={cards}
+                onCardLike={handleLikeClick}
+                onCardDelete={handleCardDelete}
+                isLogged={isLogged}
+              />
+            </>
+          } />
         </Routes>
 
         {isLogged && <Footer />}
@@ -229,8 +259,9 @@ function App() {
 
         <InfoTooltip
           isOpen={isInfoTooltipPopupOpen}
-          // isOpen={true}
           onClose={closeAllPopups}
+          infoTooltipImage={tooltipImage}
+          infoTooltipText={tooltipText}
         />
 
       </div>

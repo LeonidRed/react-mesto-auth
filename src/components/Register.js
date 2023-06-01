@@ -2,7 +2,6 @@ import React from 'react'
 import { Link } from "react-router-dom"
 
 export default function Register(props) {
-  // console.log(props)
 
   const [formValue, setFormValue] = React.useState({
     email: '',
@@ -10,7 +9,7 @@ export default function Register(props) {
   })
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value } = e.target
 
     setFormValue({
       ...formValue,
@@ -33,7 +32,7 @@ export default function Register(props) {
         <input className="authorization__input" type="password" placeholder="Пароль" name="password" value={formValue.password} onChange={handleChange} required />
         <button className="authorization__submit" type="submit">Зарегистрироваться</button>
       </form>
-      <p className="authorization__text">Уже зарегистрированы? <Link to="/sign-in" className="authorization__link">Войти</Link> </p>
+      <p className="authorization__text">Уже зарегистрированы? <Link to="/sign-in" className="authorization__link" >Войти</Link> </p>
     </section>
   )
 }

@@ -26,15 +26,7 @@ export const authorize = (email, password) => {
     },
     body: JSON.stringify({ email, password })
   })
-    .then((response => response.json()))
-    .then((token) => {
-      if (token) {
-        localStorage.setItem('token', JSON.stringify(token))
-        // localStorage.setItem('token', token)
-        return token;
-      }
-    })
-    .catch(err => console.log(err))
+    .then(checkResponse)
 }
 
 export const checkToken = (token) => {
@@ -45,7 +37,5 @@ export const checkToken = (token) => {
       'Authorization': `Bearer ${token}`,
     }
   })
-    .then(res => res.json())
-    .then(data => data)
-    .catch(err => console.log(err))
-} 
+    .then(checkResponse)
+}

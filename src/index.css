@@ -65,6 +65,8 @@
 @import url(./blocks/popup/__button-delete/popup__button-delete.css);
 @import url(./blocks/popup-avatar/popup-avatar.css);
 @import url(./blocks/popup/__title-avatar/popup__title-avatar.css);
+@import url(./blocks/popup/__container/_info/popup__container_info.css);
+@import url(./blocks/popup/__title-info/popup__title-info.css);
 
 /* ------------- authorization ------------  */
 @import url(./blocks/authorization/authorization.css);
