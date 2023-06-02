@@ -35,13 +35,14 @@ function App() {
   const [tooltipText, setTooltipText] = React.useState('')
 
   React.useEffect(() => {
-    Promise.all([api.getUserInfo(), api.getInitialCards()])
-      .then(([user, cards]) => {
-        setCurrentUser(user)
-        setCards(cards)
-      })
-      .catch(err => console.log(err))
-  }, [])
+    isLogged &&
+      Promise.all([api.getUserInfo(), api.getInitialCards()])
+        .then(([user, cards]) => {
+          setCurrentUser(user)
+          setCards(cards)
+        })
+        .catch(err => console.log(err))
+  }, [isLogged])
 
   // проверка токена
   React.useEffect(() => {
@@ -149,17 +150,19 @@ function App() {
       const jwt = JSON.parse(localStorage.getItem('token'))
       if (jwt) {
         // проверим токен
-        auth.checkToken(jwt.token).then((res) => {
-          if (res) {
-            const userData = {
-              email: res.data.email
+        auth.checkToken(jwt.token)
+          .then((res) => {
+            if (res) {
+              const userData = {
+                email: res.data.email
+              }
+              // авторизуем пользователя
+              setIsLogged(true)
+              setUserEmail(userData.email)
+              navigate("/", { replace: true })
             }
-            // авторизуем пользователя
-            setIsLogged(true)
-            setUserEmail(userData.email)
-            navigate("/", { replace: true })
-          }
-        });
+          })
+          .catch(err => console.log(err))
       }
     } else {
       setIsLogged(false)
