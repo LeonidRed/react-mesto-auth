@@ -46,7 +46,30 @@ function App() {
 
   // проверка токена
   React.useEffect(() => {
-    tokenCheck()
+    // если у пользователя есть токен в localStorage, 
+    // эта функция проверит, действующий он или нет
+    if (localStorage.getItem('token')) {
+      const jwt = JSON.parse(localStorage.getItem('token'))
+      if (jwt) {
+        // проверим токен
+        auth.checkToken(jwt.token)
+          .then((res) => {
+            if (res) {
+              const userData = {
+                email: res.data.email
+              }
+              // авторизуем пользователя
+              setIsLogged(true)
+              setUserEmail(userData.email)
+              navigate("/", { replace: true })
+            }
+          })
+          .catch(err => console.log(err))
+      }
+    } else {
+      setIsLogged(false)
+      setUserEmail('')
+    }
   }, [navigate])
 
   function handleEditProfileClick() {
@@ -143,36 +166,8 @@ function App() {
       })
   }
 
-  const tokenCheck = () => {
-    // если у пользователя есть токен в localStorage, 
-    // эта функция проверит, действующий он или нет
-    if (localStorage.getItem('token')) {
-      const jwt = JSON.parse(localStorage.getItem('token'))
-      if (jwt) {
-        // проверим токен
-        auth.checkToken(jwt.token)
-          .then((res) => {
-            if (res) {
-              const userData = {
-                email: res.data.email
-              }
-              // авторизуем пользователя
-              setIsLogged(true)
-              setUserEmail(userData.email)
-              navigate("/", { replace: true })
-            }
-          })
-          .catch(err => console.log(err))
-      }
-    } else {
-      setIsLogged(false)
-      setUserEmail('')
-    }
-  }
-
   function userSignOut() {
     localStorage.removeItem('token')
-    tokenCheck()
   }
 
   function userSignIn() {
